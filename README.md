@@ -64,3 +64,19 @@ you may need the following in `webpack.config.js`:
 ```js
 "types": ["webmcp-types"]
 ```
+
+### Publish a new npm package version
+
+(only for people who have npm publish access)
+
+* Make sure you are in the upstream repo, not your forked one. And make sure you are synced to latest commit intended for publish
+  - `git checkout main`
+  - `git pull https://github.com/webmachinelearning/webmcp-types.git main`
+    - (If you are using HTTPS regularly. You can use remote names like `origin`, just make sure you are referring to the right repo)
+* Create the version tag and commit, and push
+  - `npm version patch`
+  - `git push https://github.com/webmachinelearning/webmcp-types.git main --tags`
+* publish the package
+  - `npm publish --otp=<code>`
+    - Replace `<code>` with the one-time password from your authenticator, since two-factors authentication is required to publish.
+    - If you are doing for the first time, you will do `npm adduser` first and it will guide you through adding the npm account.
