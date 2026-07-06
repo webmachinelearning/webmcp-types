@@ -12,7 +12,7 @@ declare namespace WebMCP {
      * @param input The input parameters for the tool, as defined by its inputSchema.
      * @returns A promise that resolves with the tool's output.
      */
-    type ToolExecuteCallback = (input: object) => MaybePromise<unknown>;
+    type ToolExecuteCallback<T extends Record<string, unknown>> = (input: T) => MaybePromise<unknown>;
 
     /**
      * Metadata about a tool's behavior.
