@@ -3,11 +3,16 @@
  */
 declare namespace WebMCP {
     /**
+     * Value that may be returned synchronously or via Promise.
+     */
+    type MaybePromise<T> = T | Promise<T>;
+
+    /**
      * Callback for tool execution.
      * @param input The input parameters for the tool, as defined by its inputSchema.
      * @returns A promise that resolves with the tool's output.
      */
-    type ToolExecuteCallback = (input: object) => Promise<any>;
+    type ToolExecuteCallback = (input: object) => MaybePromise<unknown>;
 
     /**
      * Metadata about a tool's behavior.
