@@ -74,6 +74,50 @@ declare namespace WebMCP {
         exposedTo?: string[];
     }
 
+    /**
+     * Options for querying registered tools.
+     */
+    interface ModelContextGetToolOptions {
+        /**
+         * An array of origins from which to query tools.
+         */
+        fromOrigins?: string[];
+    }
+
+    /**
+     * Represents a tool that has been registered and is available for execution.
+     */
+    interface RegisteredTool {
+        /**
+         * A unique identifier for the tool.
+         */
+        name: string;
+        /**
+         * A human-readable label for the tool.
+         */
+        title: string;
+        /**
+         * Natural-language description of what the tool does.
+         */
+        description: string;
+        /**
+         * A stringified JSON Schema object describing the expected input parameters for the tool.
+         */
+        inputSchema?: string;
+        /**
+         * The Window of the document that registered the tool.
+         */
+        window: Window;
+        /**
+         * The origin of the document that registered the tool.
+         */
+        origin: string;
+        /**
+         * Metadata about the tool's behavior.
+         */
+        annotations?: ToolAnnotations;
+    }
+
     interface ModelContextEventMap {
         "toolchange": Event;
     }
@@ -88,6 +132,11 @@ declare namespace WebMCP {
          * @param options Registration options.
          */
         registerTool(tool: ModelContextTool, options?: ModelContextRegisterToolOptions): Promise<void>;
+        /**
+         * Returns a list of registered tools exposed to this document.
+         * @param options Filtering options.
+         */
+        getTools(options?: ModelContextGetToolOptions): Promise<RegisteredTool[]>;
         /**
          * Event handler for the toolchange event.
          */
