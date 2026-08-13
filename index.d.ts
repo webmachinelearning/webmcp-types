@@ -101,9 +101,10 @@ declare namespace WebMCP {
          */
         description: string;
         /**
-         * A stringified JSON Schema object describing the expected input parameters for the tool.
+         * A JSON Schema object describing the expected input parameters for the tool.
+         * It is a deep copy of the schema provided at tool registration, via `ModelContextTool.inputSchema`.
          */
-        inputSchema?: string;
+        inputSchema?: object;
         /**
          * The Window of the document that registered the tool.
          */
