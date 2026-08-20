@@ -65,6 +65,13 @@ you may need the following in `webpack.config.js`:
 "types": ["webmcp-types"]
 ```
 
+### Run the type tests
+
+- `npm install`
+- `npm test`
+
+The tests in `index.test-d.ts` are statically checked with [vitest typecheck mode](https://vitest.dev/guide/testing-types) against `tsconfig.json`; they are never executed.
+
 ### Publish a new npm package version
 
 (only for people who have npm publish access)

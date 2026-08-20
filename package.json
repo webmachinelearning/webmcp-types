@@ -7,10 +7,20 @@
   "description": "TypeScript type definitions for WebMCP",
   "main": "",
   "types": "index.d.ts",
+  "files": [
+    "index.d.ts"
+  ],
   "keywords": [
     "webmcp",
     "typescript",
     "types"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  }
 }
