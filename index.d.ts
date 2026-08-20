@@ -8,11 +8,22 @@ declare namespace WebMCP {
     type MaybePromise<T> = T | Promise<T>;
 
     /**
+     * Options passed to a tool's execute callback when the tool is executed.
+     */
+    interface ToolExecuteCallbackOptions {
+        /**
+         * An AbortSignal that communicates when the execution of the tool has been cancelled.
+         */
+        signal: AbortSignal;
+    }
+
+    /**
      * Callback for tool execution.
-     * @param input The input parameters for the tool, as defined by its inputSchema.
+     * @param inputObject The input parameters for the tool, as defined by its inputSchema.
+     * @param options Options passed when executing the tool.
      * @returns A promise that resolves with the tool's output.
      */
-    type ToolExecuteCallback<T extends Record<string, unknown>> = (input: T) => MaybePromise<unknown>;
+    type ToolExecuteCallback<T extends Record<string, unknown> = Record<string, unknown>> = (inputObject: T, options: ToolExecuteCallbackOptions) => MaybePromise<unknown>;
 
     /**
      * Metadata about a tool's behavior.
