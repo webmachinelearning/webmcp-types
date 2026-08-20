@@ -19,11 +19,12 @@ declare namespace WebMCP {
 
     /**
      * Callback for tool execution.
+     * @template T The type of the input object.
      * @param inputObject The input parameters for the tool, as defined by its inputSchema.
      * @param options Options passed when executing the tool.
      * @returns A promise that resolves with the tool's output.
      */
-    type ToolExecuteCallback<T extends Record<string, unknown> = Record<string, unknown>> = (inputObject: T, options: ToolExecuteCallbackOptions) => MaybePromise<unknown>;
+    type ToolExecuteCallback<T extends object = Record<string, unknown>> = (inputObject: T, options: ToolExecuteCallbackOptions) => MaybePromise<unknown>;
 
     /**
      * Metadata about a tool's behavior.
@@ -43,8 +44,10 @@ declare namespace WebMCP {
 
     /**
      * Describes a tool to be registered with the model context.
+     * @template T The type of the input object passed to the tool's execute callback.
+     * TypeScript does not check this type against inputSchema.
      */
-    interface ModelContextTool {
+    interface ModelContextTool<T extends object = Record<string, unknown>> {
         /**
          * The name of the tool. Must be 1-128 characters, ASCII alphanumeric, '_', '-', or '.'.
          */
@@ -64,7 +67,7 @@ declare namespace WebMCP {
         /**
          * The function to execute when the tool is called.
          */
-        execute: ToolExecuteCallback;
+        execute: ToolExecuteCallback<T>;
         /**
          * Metadata about the tool's behavior.
          */
@@ -143,7 +146,7 @@ declare namespace WebMCP {
          * @param tool The tool definition.
          * @param options Registration options.
          */
-        registerTool(tool: ModelContextTool, options?: ModelContextRegisterToolOptions): Promise<void>;
+        registerTool<T extends object = Record<string, unknown>>(tool: ModelContextTool<T>, options?: ModelContextRegisterToolOptions): Promise<void>;
         /**
          * Returns a list of registered tools exposed to this document.
          * @param options Filtering options.
