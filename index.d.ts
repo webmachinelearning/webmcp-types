@@ -1,7 +1,49 @@
+export {};
+
+type IsUnion<T, TWhole = T> = T extends TWhole ? [TWhole] extends [T] ? false : true : never;
+type NonUnionTupleElements<TTuple extends readonly string[]> = {
+    [TIndex in keyof TTuple]: true extends IsUnion<TTuple[TIndex]> ? never : TTuple[TIndex];
+}[number];
+type Simplify<T> = { [TKey in keyof T]: T[TKey] } & {};
+
+type JsonSchemaRequiredKeys<TSchema> = TSchema extends {
+    readonly required: infer TRequired extends readonly string[];
+} ? number extends TRequired["length"]
+    ? never
+    : true extends IsUnion<TRequired>
+        ? never
+        : string extends TRequired[number]
+            ? never
+            : NonUnionTupleElements<TRequired>
+    : never;
+
+type InferJsonSchema<TSchema> = TSchema extends { readonly const: infer TValue } ? TValue
+    : TSchema extends { readonly enum: readonly (infer TValue)[] } ? TValue
+    : TSchema extends { readonly type: "string" } ? string
+    : TSchema extends { readonly type: "number" | "integer" } ? number
+    : TSchema extends { readonly type: "boolean" } ? boolean
+    : TSchema extends { readonly type: "null" } ? null
+    : TSchema extends { readonly type: "array" }
+        ? TSchema extends { readonly items: infer TItems } ? InferJsonSchema<TItems>[] : unknown[]
+    : TSchema extends { readonly type: "object" } | { readonly properties: object }
+        ? TSchema extends { readonly properties: infer TProperties extends object }
+            ? keyof TProperties extends never ? Record<string, unknown> : Simplify<{
+                -readonly [K in keyof TProperties]?: InferJsonSchema<TProperties[K]>;
+            } & {
+                -readonly [K in keyof TProperties & JsonSchemaRequiredKeys<TSchema>]-?: InferJsonSchema<TProperties[K]>;
+            }>
+        : Record<string, unknown>
+    : unknown;
+
+type InferToolInput<TSchema> = [InferJsonSchema<TSchema>] extends [null | undefined] ? Record<string, unknown>
+    : InferJsonSchema<TSchema> extends object ? InferJsonSchema<TSchema>
+    : Record<string, unknown>;
+
+declare global {
 /**
  * The WebMCP API enables web apps to provide JavaScript-based tools to AI agents.
  */
-declare namespace WebMCP {
+namespace WebMCP {
     /**
      * Value that may be returned synchronously or via Promise.
      */
@@ -23,7 +65,7 @@ declare namespace WebMCP {
      * @param options Options passed when executing the tool.
      * @returns A promise that resolves with the tool's output.
      */
-    type ToolExecuteCallback<T extends Record<string, unknown> = Record<string, unknown>> = (inputObject: T, options: ToolExecuteCallbackOptions) => MaybePromise<unknown>;
+    type ToolExecuteCallback<T extends object = Record<string, unknown>> = (inputObject: T, options: ToolExecuteCallbackOptions) => MaybePromise<unknown>;
 
     /**
      * Metadata about a tool's behavior.
@@ -70,6 +112,12 @@ declare namespace WebMCP {
          */
         annotations?: ToolAnnotations;
     }
+
+    /** A tool whose execute input is inferred from its input schema. */
+    type ModelContextToolFromSchema<TInputSchema extends object> = Omit<ModelContextTool, "inputSchema" | "execute"> & {
+        inputSchema: TInputSchema;
+        execute: ToolExecuteCallback<InferToolInput<TInputSchema>>;
+    };
 
     /**
      * Options for registering a tool.
@@ -143,6 +191,7 @@ declare namespace WebMCP {
          * @param tool The tool definition.
          * @param options Registration options.
          */
+        registerTool<const TInputSchema extends object>(tool: ModelContextToolFromSchema<TInputSchema>, options?: ModelContextRegisterToolOptions): Promise<void>;
         registerTool(tool: ModelContextTool, options?: ModelContextRegisterToolOptions): Promise<void>;
         /**
          * Returns a list of registered tools exposed to this document.
@@ -167,4 +216,5 @@ interface Document {
      * May be undefined if the browser doesn't support WebMCP.
      */
     readonly modelContext?: WebMCP.ModelContext;
+}
 }
