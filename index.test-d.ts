@@ -1,7 +1,9 @@
 import { expectTypeOf, test } from 'vitest';
+import type { WebMCP as ImportedWebMCP } from './index.js';
 
-test('keeps the WebMCP declarations ambient', () => {
+test('exposes WebMCP as both an ambient and exported namespace', () => {
     expectTypeOf<Document['modelContext']>().toEqualTypeOf<WebMCP.ModelContext | undefined>();
+    expectTypeOf<ImportedWebMCP.ModelContext>().toEqualTypeOf<WebMCP.ModelContext>();
 });
 
 test('infers an inline object schema', () => {

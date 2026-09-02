@@ -187,11 +187,16 @@ namespace WebMCP {
      */
     interface ModelContext extends EventTarget {
         /**
-         * Registers a new tool.
+         * Registers a new tool and infers its execute input from its input schema.
          * @param tool The tool definition.
          * @param options Registration options.
          */
         registerTool<const TInputSchema extends object>(tool: ModelContextToolFromSchema<TInputSchema>, options?: ModelContextRegisterToolOptions): Promise<void>;
+        /**
+         * Registers a new tool.
+         * @param tool The tool definition.
+         * @param options Registration options.
+         */
         registerTool(tool: ModelContextTool, options?: ModelContextRegisterToolOptions): Promise<void>;
         /**
          * Returns a list of registered tools exposed to this document.
@@ -218,3 +223,5 @@ interface Document {
     readonly modelContext?: WebMCP.ModelContext;
 }
 }
+
+export type { WebMCP };
