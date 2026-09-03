@@ -17,6 +17,8 @@ See the [TypeScript handbook](http://www.typescriptlang.org/docs/handbook/declar
 - yarn: `yarn add --dev webmcp-types`
 - pnpm: `pnpm add -D webmcp-types`
 
+This package requires TypeScript 5.0 or newer.
+
 ### Configure
 
 Since this package is outside DefinitelyTyped, the dependency won't be picked up automatically.
@@ -64,6 +66,13 @@ you may need the following in `webpack.config.js`:
 ```js
 "types": ["webmcp-types"]
 ```
+
+### Run the type tests
+
+- `npm install`
+- `npm test`
+
+The tests in `index.test-d.ts` are statically checked with [Vitest typecheck mode](https://vitest.dev/guide/testing-types) against `tsconfig.json`; they are never executed.
 
 ### Publish a new npm package version
 
