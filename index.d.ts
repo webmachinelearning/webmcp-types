@@ -81,6 +81,11 @@ namespace WebMCP {
          * @default false
          */
         untrustedContentHint?: boolean;
+        /**
+         * If `true`, indicates that executing the tool will result in consequential actions that are significant, real-world, or non-reversible, ex: booking a flight, transferring money.
+         * @default false
+         */
+        consequentialHint?: boolean;
     }
 
     /**
