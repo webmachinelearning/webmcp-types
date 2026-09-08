@@ -141,3 +141,24 @@ test('rejects a callback that disagrees with its schema', () => {
         execute: (input: { query: number }) => input.query,
     });
 });
+
+test('supports tool annotations', () => {
+    void document.modelContext?.registerTool({
+        name: 'annotated-tool',
+        description: 'Defines all tool annotations.',
+        annotations: {
+            readOnlyHint: true,
+            untrustedContentHint: false,
+            consequentialHint: false,
+        },
+        execute: () => {},
+    });
+
+    expectTypeOf<WebMCP.ToolAnnotations>().toEqualTypeOf<{
+        readOnlyHint?: boolean;
+        untrustedContentHint?: boolean;
+        consequentialHint?: boolean;
+    }>();
+    expectTypeOf<WebMCP.ModelContextTool['annotations']>().toEqualTypeOf<WebMCP.ToolAnnotations | undefined>();
+    expectTypeOf<WebMCP.RegisteredTool['annotations']>().toEqualTypeOf<WebMCP.ToolAnnotations | undefined>();
+});
