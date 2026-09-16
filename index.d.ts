@@ -149,6 +149,16 @@ namespace WebMCP {
     }
 
     /**
+     * Options for executing a tool.
+     */
+    interface ModelContextExecuteToolOptions {
+        /**
+         * An AbortSignal that can be used to cancel the execution of the tool.
+         */
+        signal?: AbortSignal;
+    }
+
+    /**
      * Represents a tool that has been registered and is available for execution.
      */
     interface RegisteredTool {
@@ -208,6 +218,13 @@ namespace WebMCP {
          * @param options Filtering options.
          */
         getTools(options?: ModelContextGetToolOptions): Promise<RegisteredTool[]>;
+        /**
+         * Executes a tool on the document it was registered on.
+         * @param tool The tool to execute.
+         * @param inputObject The input parameters for the tool.
+         * @param options Execution options.
+         */
+        executeTool(tool: RegisteredTool, inputObject?: object, options?: ModelContextExecuteToolOptions): Promise<string>;
         /**
          * Event handler for the toolchange event.
          */

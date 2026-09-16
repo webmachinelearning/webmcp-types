@@ -162,3 +162,28 @@ test('supports tool annotations', () => {
     expectTypeOf<WebMCP.ModelContextTool['annotations']>().toEqualTypeOf<WebMCP.ToolAnnotations | undefined>();
     expectTypeOf<WebMCP.RegisteredTool['annotations']>().toEqualTypeOf<WebMCP.ToolAnnotations | undefined>();
 });
+
+declare const registeredTool: WebMCP.RegisteredTool;
+
+test('supports executeTool', async () => {
+    const controller = new AbortController();
+
+    if (document.modelContext) {
+        const result = await document.modelContext.executeTool(registeredTool);
+        expectTypeOf(result).toEqualTypeOf<string>();
+
+        await document.modelContext.executeTool(registeredTool, { query: 'test' });
+        await document.modelContext.executeTool(registeredTool, [1, 2, 3]);
+        await document.modelContext.executeTool(registeredTool, {}, { signal: controller.signal });
+
+        // @ts-expect-error inputObject must be an object.
+        await document.modelContext.executeTool(registeredTool, 'invalid');
+        // @ts-expect-error inputObject must be an object.
+        await document.modelContext.executeTool(registeredTool, 123);
+    }
+
+    expectTypeOf<WebMCP.ModelContextExecuteToolOptions>().toEqualTypeOf<{
+        signal?: AbortSignal;
+    }>();
+});
+
