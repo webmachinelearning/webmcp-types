@@ -150,6 +150,7 @@ test('supports tool annotations', () => {
             readOnlyHint: true,
             untrustedContentHint: false,
             consequentialHint: false,
+            debugging: false,
         },
         execute: () => {},
     });
@@ -158,6 +159,7 @@ test('supports tool annotations', () => {
         readOnlyHint?: boolean;
         untrustedContentHint?: boolean;
         consequentialHint?: boolean;
+        debugging?: boolean;
     }>();
     expectTypeOf<WebMCP.ModelContextTool['annotations']>().toEqualTypeOf<WebMCP.ToolAnnotations | undefined>();
     expectTypeOf<WebMCP.RegisteredTool['annotations']>().toEqualTypeOf<WebMCP.ToolAnnotations | undefined>();

@@ -86,6 +86,11 @@ namespace WebMCP {
          * @default false
          */
         consequentialHint?: boolean;
+        /**
+         * If `true`, indicates that the tool is intended for debugging and developer tooling rather than end-user interactions.
+         * @default false
+         */
+        debugging?: boolean;
     }
 
     /**
