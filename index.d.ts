@@ -198,8 +198,30 @@ namespace WebMCP {
         annotations?: ToolAnnotations;
     }
 
+    /**
+     * Initialization options for a `ToolActivatedEvent`.
+     */
+    type ToolActivatedEventInit = globalThis.ToolActivatedEventInit;
+
+    /**
+     * Event dispatched at a `ModelContext` when the execution of a tool begins.
+     */
+    type ToolActivatedEvent = globalThis.ToolActivatedEvent;
+
+    /**
+     * Initialization options for a `ToolCancelEvent`.
+     */
+    type ToolCancelEventInit = globalThis.ToolCancelEventInit;
+
+    /**
+     * Event dispatched at a `ModelContext` when the execution of a tool is cancelled.
+     */
+    type ToolCancelEvent = globalThis.ToolCancelEvent;
+
     interface ModelContextEventMap {
         "toolchange": Event;
+        "toolactivated": ToolActivatedEvent;
+        "toolcancel": ToolCancelEvent;
     }
 
     /**
@@ -234,6 +256,14 @@ namespace WebMCP {
          * Event handler for the toolchange event.
          */
         ontoolchange: ((this: ModelContext, ev: Event) => any) | null;
+        /**
+         * Event handler for the toolactivated event.
+         */
+        ontoolactivated: ((this: ModelContext, ev: ToolActivatedEvent) => any) | null;
+        /**
+         * Event handler for the toolcancel event.
+         */
+        ontoolcancel: ((this: ModelContext, ev: ToolCancelEvent) => any) | null;
 
         addEventListener<K extends keyof ModelContextEventMap>(type: K, listener: (this: ModelContext, ev: ModelContextEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
@@ -249,6 +279,50 @@ interface Document {
      */
     readonly modelContext?: WebMCP.ModelContext;
 }
+
+interface ToolActivatedEventInit extends EventInit {
+    /**
+     * The name of the tool whose execution has started.
+     */
+    toolName?: string;
+}
+
+/**
+ * The event dispatched at a `ModelContext` object when the execution of a tool begins.
+ */
+interface ToolActivatedEvent extends Event {
+    /**
+     * The name of the tool whose execution has started.
+     */
+    readonly toolName: string;
+}
+
+var ToolActivatedEvent: {
+    prototype: ToolActivatedEvent;
+    new(type: string, eventInitDict?: ToolActivatedEventInit): ToolActivatedEvent;
+};
+
+interface ToolCancelEventInit extends EventInit {
+    /**
+     * The name of the tool whose execution was cancelled.
+     */
+    toolName?: string;
+}
+
+/**
+ * The event dispatched at a `ModelContext` object when the execution of a tool is cancelled.
+ */
+interface ToolCancelEvent extends Event {
+    /**
+     * The name of the tool whose execution was cancelled.
+     */
+    readonly toolName: string;
+}
+
+var ToolCancelEvent: {
+    prototype: ToolCancelEvent;
+    new(type: string, eventInitDict?: ToolCancelEventInit): ToolCancelEvent;
+};
 }
 
 export type { WebMCP };

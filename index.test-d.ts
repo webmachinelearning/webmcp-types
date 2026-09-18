@@ -189,3 +189,47 @@ test('supports executeTool', async () => {
     }>();
 });
 
+test('supports the toolchange, toolactivated, and toolcancel events', () => {
+    document.modelContext?.addEventListener('toolchange', (event) => {
+        expectTypeOf(event).toEqualTypeOf<Event>();
+    });
+
+    document.modelContext?.addEventListener('toolactivated', (event) => {
+        expectTypeOf(event).toEqualTypeOf<ToolActivatedEvent>();
+        expectTypeOf(event.toolName).toEqualTypeOf<string>();
+    });
+
+    document.modelContext?.addEventListener('toolcancel', (event) => {
+        expectTypeOf(event).toEqualTypeOf<ToolCancelEvent>();
+        expectTypeOf(event.toolName).toEqualTypeOf<string>();
+    });
+
+    if (document.modelContext) {
+        document.modelContext.ontoolchange = (event) => {
+            expectTypeOf(event).toEqualTypeOf<Event>();
+        };
+        document.modelContext.ontoolactivated = (event) => {
+            expectTypeOf(event).toEqualTypeOf<ToolActivatedEvent>();
+        };
+        document.modelContext.ontoolcancel = (event) => {
+            expectTypeOf(event).toEqualTypeOf<ToolCancelEvent>();
+        };
+        document.modelContext.ontoolchange = null;
+        document.modelContext.ontoolactivated = null;
+        document.modelContext.ontoolcancel = null;
+    }
+
+    expectTypeOf(new ToolActivatedEvent('toolactivated')).toEqualTypeOf<ToolActivatedEvent>();
+    expectTypeOf(new ToolActivatedEvent('toolactivated', { toolName: 'search', bubbles: true }))
+        .toEqualTypeOf<ToolActivatedEvent>();
+    expectTypeOf(new ToolCancelEvent('toolcancel', { toolName: 'search' })).toEqualTypeOf<ToolCancelEvent>();
+
+    expectTypeOf<ToolActivatedEvent>().toExtend<Event>();
+    expectTypeOf<ToolCancelEvent>().toExtend<Event>();
+    expectTypeOf<WebMCP.ToolActivatedEvent>().toEqualTypeOf<ToolActivatedEvent>();
+    expectTypeOf<WebMCP.ToolCancelEvent>().toEqualTypeOf<ToolCancelEvent>();
+    expectTypeOf<WebMCP.ToolActivatedEventInit>().toEqualTypeOf<ToolActivatedEventInit>();
+    expectTypeOf<WebMCP.ToolCancelEventInit>().toEqualTypeOf<ToolCancelEventInit>();
+    expectTypeOf<ToolActivatedEventInit['toolName']>().toEqualTypeOf<string | undefined>();
+    expectTypeOf<ToolCancelEventInit['toolName']>().toEqualTypeOf<string | undefined>();
+});
