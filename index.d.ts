@@ -1,11 +1,10 @@
-export {};
-
 type IsUnion<T, TWhole = T> = T extends TWhole ? [TWhole] extends [T] ? false : true : never;
 type NonUnionTupleElements<TTuple extends readonly string[]> = {
     [TIndex in keyof TTuple]: true extends IsUnion<TTuple[TIndex]> ? never : TTuple[TIndex];
 }[number];
 type Simplify<T> = { [TKey in keyof T]: T[TKey] } & {};
 
+// Only literal names in a literal tuple are required; widened or union shapes are runtime choices.
 type JsonSchemaRequiredKeys<TSchema> = TSchema extends {
     readonly required: infer TRequired extends readonly string[];
 } ? number extends TRequired["length"]
@@ -283,6 +282,7 @@ interface Document {
 interface ToolActivatedEventInit extends EventInit {
     /**
      * The name of the tool whose execution has started.
+     * @default ""
      */
     toolName?: string;
 }
@@ -305,6 +305,7 @@ var ToolActivatedEvent: {
 interface ToolCancelEventInit extends EventInit {
     /**
      * The name of the tool whose execution was cancelled.
+     * @default ""
      */
     toolName?: string;
 }
@@ -323,6 +324,24 @@ var ToolCancelEvent: {
     prototype: ToolCancelEvent;
     new(type: string, eventInitDict?: ToolCancelEventInit): ToolCancelEvent;
 };
+
+interface SubmitEvent {
+    /**
+     * Whether an agent caused this submission by invoking the form's declarative tool.
+     * Absent in browsers without declarative tools, so check it before calling `respondWith()`.
+     *
+     * @see https://github.com/webmachinelearning/webmcp/blob/main/declarative-api-explainer.md#events
+     */
+    readonly agentInvoked: boolean;
+    /**
+     * Responds to the agent that invoked the form's declarative tool instead of letting the form navigate.
+     * Call during submit event dispatch, after calling `preventDefault()`.
+     *
+     * @param agentResponse A promise that resolves to the response the agent will consume.
+     * @see https://github.com/webmachinelearning/webmcp/blob/main/declarative-api-explainer.md#events
+     */
+    respondWith(agentResponse: PromiseLike<unknown>): void;
+}
 }
 
 export type { WebMCP };

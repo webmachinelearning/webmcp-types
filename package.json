@@ -8,7 +8,6 @@
   "homepage": "https://github.com/webmachinelearning/webmcp-types",
   "bugs": "https://github.com/webmachinelearning/webmcp-types/issues",
   "description": "TypeScript type definitions for WebMCP",
-  "main": "",
   "types": "index.d.ts",
   "files": [
     "index.d.ts"

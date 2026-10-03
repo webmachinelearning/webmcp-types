@@ -194,7 +194,8 @@ test('supports the toolchange, toolactivated, and toolcancel events', () => {
         expectTypeOf(event).toEqualTypeOf<Event>();
     });
 
-    document.modelContext?.addEventListener('toolactivated', (event) => {
+    document.modelContext?.addEventListener('toolactivated', function (event) {
+        expectTypeOf(this).toEqualTypeOf<WebMCP.ModelContext>();
         expectTypeOf(event).toEqualTypeOf<ToolActivatedEvent>();
         expectTypeOf(event.toolName).toEqualTypeOf<string>();
     });
@@ -203,12 +204,14 @@ test('supports the toolchange, toolactivated, and toolcancel events', () => {
         expectTypeOf(event).toEqualTypeOf<ToolCancelEvent>();
         expectTypeOf(event.toolName).toEqualTypeOf<string>();
     });
+    window.addEventListener('toolactivated', (event) => expectTypeOf(event).toEqualTypeOf<Event>());
 
     if (document.modelContext) {
         document.modelContext.ontoolchange = (event) => {
             expectTypeOf(event).toEqualTypeOf<Event>();
         };
-        document.modelContext.ontoolactivated = (event) => {
+        document.modelContext.ontoolactivated = function (event) {
+            expectTypeOf(this).toEqualTypeOf<WebMCP.ModelContext>();
             expectTypeOf(event).toEqualTypeOf<ToolActivatedEvent>();
         };
         document.modelContext.ontoolcancel = (event) => {
@@ -217,12 +220,29 @@ test('supports the toolchange, toolactivated, and toolcancel events', () => {
         document.modelContext.ontoolchange = null;
         document.modelContext.ontoolactivated = null;
         document.modelContext.ontoolcancel = null;
+        // @ts-expect-error toolchange dispatches a plain Event.
+        document.modelContext.ontoolchange = (event: ToolActivatedEvent) => event.toolName;
     }
 
-    expectTypeOf(new ToolActivatedEvent('toolactivated')).toEqualTypeOf<ToolActivatedEvent>();
+    const activated = new ToolActivatedEvent('toolactivated');
+    expectTypeOf(activated).toEqualTypeOf<ToolActivatedEvent>();
     expectTypeOf(new ToolActivatedEvent('toolactivated', { toolName: 'search', bubbles: true }))
         .toEqualTypeOf<ToolActivatedEvent>();
-    expectTypeOf(new ToolCancelEvent('toolcancel', { toolName: 'search' })).toEqualTypeOf<ToolCancelEvent>();
+    expectTypeOf(new ToolCancelEvent('toolcancel', { toolName: 'search', bubbles: true })).toEqualTypeOf<ToolCancelEvent>();
+
+    expectTypeOf<{}>().toExtend<ToolActivatedEventInit>();
+    expectTypeOf<{}>().toExtend<ToolCancelEventInit>();
+    const event = new Event('toolactivated');
+    if (event instanceof ToolActivatedEvent) {
+        expectTypeOf(event).toEqualTypeOf<ToolActivatedEvent>();
+    }
+
+    // @ts-expect-error The event type is required.
+    new ToolActivatedEvent();
+    // @ts-expect-error toolName is a string.
+    new ToolCancelEvent('toolcancel', { toolName: 1 });
+    // @ts-expect-error toolName is read-only.
+    activated.toolName = 'other';
 
     expectTypeOf<ToolActivatedEvent>().toExtend<Event>();
     expectTypeOf<ToolCancelEvent>().toExtend<Event>();
@@ -232,4 +252,28 @@ test('supports the toolchange, toolactivated, and toolcancel events', () => {
     expectTypeOf<WebMCP.ToolCancelEventInit>().toEqualTypeOf<ToolCancelEventInit>();
     expectTypeOf<ToolActivatedEventInit['toolName']>().toEqualTypeOf<string | undefined>();
     expectTypeOf<ToolCancelEventInit['toolName']>().toEqualTypeOf<string | undefined>();
+});
+
+test("adds the declarative explainer's SubmitEvent members", () => {
+    document.forms[0].addEventListener('submit', (event) => {
+        expectTypeOf(event.agentInvoked).toEqualTypeOf<boolean>();
+        expectTypeOf(event.respondWith).parameters
+            .toEqualTypeOf<[agentResponse: PromiseLike<unknown>]>();
+        expectTypeOf(event.respondWith).returns.toEqualTypeOf<void>();
+
+        if (event.agentInvoked) {
+            event.preventDefault();
+            event.respondWith(fetch('/search').then((response) => response.json()));
+        }
+
+        // @ts-expect-error agentInvoked is read-only.
+        event.agentInvoked = true;
+        // @ts-expect-error respondWith() requires a response.
+        event.respondWith();
+        // @ts-expect-error Pass the response promise, not a function that creates it.
+        event.respondWith(async () => 'done');
+    });
+
+    // @ts-expect-error SubmitEventInit has no agentInvoked member; only Chromium adds one.
+    new SubmitEvent('submit', { agentInvoked: true });
 });
