@@ -165,6 +165,48 @@ test('supports tool annotations', () => {
     expectTypeOf<WebMCP.RegisteredTool['annotations']>().toEqualTypeOf<WebMCP.ToolAnnotations | undefined>();
 });
 
+test('supports an output schema', () => {
+    void document.modelContext?.registerTool({
+        name: 'output-only',
+        description: 'Defines only an output schema.',
+        outputSchema: {
+            type: 'object',
+            properties: { total: { type: 'number' } },
+            required: ['total'],
+        },
+        execute: () => ({ total: 42 }),
+    });
+
+    void document.modelContext?.registerTool({
+        name: 'input-and-output',
+        description: 'Defines both input and output schemas.',
+        inputSchema: {
+            type: 'object',
+            properties: { query: { type: 'string' } },
+            required: ['query'],
+        },
+        outputSchema: {
+            type: 'object',
+            properties: { results: { type: 'array', items: { type: 'string' } } },
+        },
+        execute: (input) => {
+            expectTypeOf(input).toEqualTypeOf<{ query: string }>();
+            return { results: [input.query] };
+        },
+    });
+
+    void document.modelContext?.registerTool({
+        name: 'invalid-output-schema',
+        description: 'Output schema must be an object.',
+        // @ts-expect-error outputSchema must be an object.
+        outputSchema: '',
+        execute: () => {},
+    });
+
+    expectTypeOf<WebMCP.ModelContextTool['outputSchema']>().toEqualTypeOf<object | undefined>();
+    expectTypeOf<WebMCP.RegisteredTool['outputSchema']>().toEqualTypeOf<object | undefined>();
+});
+
 declare const registeredTool: WebMCP.RegisteredTool;
 
 test('supports executeTool', async () => {

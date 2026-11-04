@@ -114,6 +114,11 @@ namespace WebMCP {
          */
         inputSchema?: object;
         /**
+         * A JSON Schema describing the expected output structure for the tool.
+         * Tool output is expected to conform to the provided schema, and agents may reject outputs that do not validate.
+         */
+        outputSchema?: object;
+        /**
          * The function to execute when the tool is called.
          */
         execute: ToolExecuteCallback;
@@ -184,6 +189,12 @@ namespace WebMCP {
          * It is a deep copy of the schema provided at tool registration, via `ModelContextTool.inputSchema`.
          */
         inputSchema?: object;
+        /**
+         * A JSON Schema object describing the expected output structure for the tool.
+         * Tool output is expected to conform to the provided schema, and agents may reject outputs that do not validate.
+         * It is a deep copy of the schema provided at tool registration, via `ModelContextTool.outputSchema`.
+         */
+        outputSchema?: object;
         /**
          * The Window of the document that registered the tool.
          */
