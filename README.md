@@ -67,6 +67,39 @@ you may need the following in `webpack.config.js`:
 "types": ["webmcp-types"]
 ```
 
+### Infer types from schemas
+
+When `inputSchema` and `outputSchema` are written inline, `registerTool()` infers the type of
+`execute`'s input and checks its return value against the output schema:
+
+```ts
+document.modelContext?.registerTool({
+  name: "search",
+  description: "Searches the catalog.",
+  inputSchema: {
+    type: "object",
+    properties: { query: { type: "string" }, limit: { type: "integer" } },
+    required: ["query"],
+  },
+  outputSchema: {
+    type: "object",
+    properties: { results: { type: "array", items: { type: "string" } } },
+    required: ["results"],
+  },
+  // input: { query: string; limit?: number }
+  // return type: { results: string[] } (or a Promise of it)
+  execute: async (input) => ({ results: [input.query] }),
+});
+```
+
+Tools without schemas, or whose schemas are typed as a plain `object`, fall back to a
+`Record<string, unknown>` input and an `unknown` return type.
+
+> [!NOTE]
+> If `execute` declares no parameters (e.g. `() => ({ status: "ok" })`), TypeScript checks it before
+> inferring the output schema, so returned `enum`/`const` values are widened (e.g. to `string`) and
+> rejected. Declaring the input parameter (e.g. `(input) => ...`) avoids this.
+
 ### Run the type tests
 
 - `npm install`
