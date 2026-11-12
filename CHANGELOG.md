@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.11](https://github.com/webmachinelearning/webmcp-types/compare/v0.1.10...v0.1.11) (2026-11-12)
+
+
+### Features
+
+* add outputSchema and infer execute output from it ([259d15c](https://github.com/webmachinelearning/webmcp-types/commit/259d15c49aa6262c19ee192a7afaf0225c7a8a7f))
+* add outputSchema to ModelContextTool and RegisteredTool ([c722462](https://github.com/webmachinelearning/webmcp-types/commit/c722462a4f427f6cb5281038486dc007897e2bec))
+* infer execute output from outputSchema ([cf3599d](https://github.com/webmachinelearning/webmcp-types/commit/cf3599d0b1e30f897a3ac99a6442b9fbfca07f3a))
+
 ## [0.1.10](https://github.com/webmachinelearning/webmcp-types/compare/v0.1.9...v0.1.10) (2026-09-28)
 
 
