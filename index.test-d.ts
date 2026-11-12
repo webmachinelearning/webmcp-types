@@ -90,16 +90,32 @@ test('leaves fields optional when a required key is selected at runtime', () => 
 });
 
 declare const widenedSchema: object;
+declare const prebuiltTool: WebMCP.ModelContextTool;
 
-test('keeps the existing fallback for widened schemas and prebuilt tools', () => {
+test('keeps the fallback for widened schemas and prebuilt tools', () => {
     const tool = {
         name: 'prebuilt',
         description: 'Keeps the existing ModelContextTool contract.',
         inputSchema: widenedSchema,
-        execute: (input) => expectTypeOf(input).toEqualTypeOf<Record<string, unknown>>(),
+        outputSchema: widenedSchema,
+        execute: (input) => {
+            expectTypeOf(input).toEqualTypeOf<Record<string, unknown>>();
+            return 'anything';
+        },
     } satisfies WebMCP.ModelContextTool;
 
     void document.modelContext?.registerTool(tool);
+    void document.modelContext?.registerTool(prebuiltTool);
+    void document.modelContext?.registerTool({
+        name: 'widened',
+        description: 'Does not infer from widened schemas.',
+        inputSchema: widenedSchema,
+        outputSchema: widenedSchema,
+        execute: (input) => {
+            expectTypeOf(input).toEqualTypeOf<Record<string, unknown>>();
+            return 'anything';
+        },
+    });
 });
 
 type SearchSchema = {
@@ -108,16 +124,27 @@ type SearchSchema = {
     required: ['query'];
 };
 
+type SearchResultsSchema = {
+    type: 'array';
+    items: { type: 'string' };
+};
+
 test('exposes a named inferred tool type', () => {
     expectTypeOf<WebMCP.ModelContextToolFromSchema<SearchSchema>['execute']>()
         .parameter(0)
         .toEqualTypeOf<{ query: string }>();
+    expectTypeOf<WebMCP.ModelContextToolFromSchema<SearchSchema, SearchResultsSchema>['execute']>()
+        .returns
+        .toEqualTypeOf<WebMCP.MaybePromise<string[]>>();
 });
 
 test('uses an object fallback for a null schema', () => {
-    expectTypeOf<WebMCP.ModelContextToolFromSchema<{ type: 'null' }>['execute']>()
-        .parameter(0)
-        .toEqualTypeOf<Record<string, unknown>>();
+    void document.modelContext?.registerTool({
+        name: 'null-schema',
+        description: 'Falls back to an object input.',
+        inputSchema: { type: 'null' },
+        execute: (input) => expectTypeOf(input).toEqualTypeOf<Record<string, unknown>>(),
+    });
 });
 
 test('accepts a tool without an input schema', () => {
@@ -163,6 +190,91 @@ test('supports tool annotations', () => {
     }>();
     expectTypeOf<WebMCP.ModelContextTool['annotations']>().toEqualTypeOf<WebMCP.ToolAnnotations | undefined>();
     expectTypeOf<WebMCP.RegisteredTool['annotations']>().toEqualTypeOf<WebMCP.ToolAnnotations | undefined>();
+});
+
+test('infers execute output from an output schema', () => {
+    void document.modelContext?.registerTool({
+        name: 'output-only',
+        description: 'Infers the return type from the output schema.',
+        outputSchema: {
+            type: 'object',
+            properties: {
+                total: { type: 'number' },
+                currency: { enum: ['EUR', 'USD'] },
+            },
+            required: ['total'],
+        },
+        execute: (input) => {
+            expectTypeOf(input).toEqualTypeOf<Record<string, unknown>>();
+            return { total: 42, currency: 'EUR' };
+        },
+    });
+
+    void document.modelContext?.registerTool({
+        name: 'input-and-output',
+        description: 'Infers both input and output.',
+        inputSchema: {
+            type: 'object',
+            properties: { query: { type: 'string' } },
+            required: ['query'],
+        },
+        outputSchema: {
+            type: 'object',
+            properties: { results: { type: 'array', items: { type: 'string' } } },
+        },
+        execute: (input) => {
+            expectTypeOf(input).toEqualTypeOf<{ query: string }>();
+            return { results: [input.query] };
+        },
+    });
+
+    void document.modelContext?.registerTool({
+        name: 'async-output',
+        description: 'Accepts an async execute callback.',
+        outputSchema: { type: 'array', items: { type: 'string' } },
+        execute: async () => ['a', 'b'],
+    });
+
+    expectTypeOf<WebMCP.ModelContextTool['outputSchema']>().toEqualTypeOf<object | undefined>();
+    expectTypeOf<WebMCP.RegisteredTool['outputSchema']>().toEqualTypeOf<object | undefined>();
+});
+
+test('rejects an invalid output schema or a return value that disagrees with it', () => {
+    void document.modelContext?.registerTool({
+        name: 'invalid-output-schema',
+        description: 'Output schema must be an object.',
+        // @ts-expect-error outputSchema must be an object.
+        outputSchema: '',
+        execute: () => {},
+    });
+
+    void document.modelContext?.registerTool({
+        name: 'output-mismatch',
+        description: 'Must return a value matching its output schema.',
+        outputSchema: {
+            type: 'object',
+            properties: { total: { type: 'number' } },
+            required: ['total'],
+        },
+        // @ts-expect-error total is a number in outputSchema.
+        execute: () => ({ total: 'many' }),
+    });
+
+    void document.modelContext?.registerTool({
+        name: 'output-missing',
+        description: 'Must return the required output properties.',
+        inputSchema: {
+            type: 'object',
+            properties: { query: { type: 'string' } },
+        },
+        outputSchema: {
+            type: 'object',
+            properties: { total: { type: 'number' } },
+            required: ['total'],
+        },
+        // @ts-expect-error total is required in outputSchema.
+        execute: async () => ({}),
+    });
 });
 
 declare const registeredTool: WebMCP.RegisteredTool;
