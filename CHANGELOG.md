@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.0](https://github.com/webmachinelearning/webmcp-types/compare/v0.1.11...v0.2.0) (2026-11-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* replace RegisteredTool dictionary with Tool interface
+
+### Features
+
+* replace RegisteredTool dictionary with Tool interface ([d509629](https://github.com/webmachinelearning/webmcp-types/commit/d509629377b21fdbaa8c13ebe3bb3cb2f25a0647))
+
 ## [0.1.11](https://github.com/webmachinelearning/webmcp-types/compare/v0.1.10...v0.1.11) (2026-11-12)
 
 
