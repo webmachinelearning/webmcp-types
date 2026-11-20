@@ -176,45 +176,60 @@ namespace WebMCP {
     }
 
     /**
-     * Represents a tool that has been registered and is available for execution.
+     * Represents a tool that has been registered and exposed to a document for execution.
+     * It is obtained by `getTools()`, and executed with `executeTool()`.
+     * A `Tool` is a snapshot of the tool at the time `getTools()` discovered it, and identifies that specific registration of the tool:
+     * if that tool is unregistered, executing the `Tool` fails, even if a new tool is later registered under the same name.
      */
-    interface RegisteredTool {
+    interface Tool {
         /**
-         * A unique identifier for the tool.
+         * The name of the tool. It is the same value provided at tool registration, via `ModelContextTool.name`.
          */
-        name: string;
+        readonly name: string;
         /**
-         * A human-readable label for the tool.
+         * A human-readable label for the tool. It is the same value provided at tool registration, via `ModelContextTool.title`.
          */
-        title: string;
+        readonly title: string;
         /**
          * Natural-language description of what the tool does.
          */
-        description: string;
+        readonly description: string;
         /**
-         * A JSON Schema object describing the expected input parameters for the tool.
+         * A JSON Schema object describing the expected input parameters for the tool, or `null` if the tool was registered without one.
          * It is a deep copy of the schema provided at tool registration, via `ModelContextTool.inputSchema`.
          */
-        inputSchema?: object;
+        readonly inputSchema: object | null;
         /**
-         * A JSON Schema object describing the expected output structure for the tool.
+         * A JSON Schema object describing the expected output structure for the tool, or `null` if the tool was registered without one.
          * Tool output is expected to conform to the provided schema, and agents may reject outputs that do not validate.
          * It is a deep copy of the schema provided at tool registration, via `ModelContextTool.outputSchema`.
          */
-        outputSchema?: object;
+        readonly outputSchema: object | null;
+        /**
+         * The WindowProxy of the document that registered the tool, or `null` if that document is no longer fully active, e.g., because it was navigated away from.
+         */
+        readonly source: WindowProxy | null;
         /**
          * The Window of the document that registered the tool.
+         * @deprecated Use `source` instead. Only present in Chrome versions before 160.
          */
-        window: Window;
+        // TODO: Remove once Chrome 160 reaches the stable channel.
+        readonly window?: Window;
         /**
          * The origin of the document that registered the tool.
          */
-        origin: string;
+        readonly origin: string;
         /**
-         * Metadata about the tool's behavior.
+         * Metadata about the tool's behavior, matching `ModelContextTool.annotations`, or `null` if the tool was registered without any.
          */
-        annotations?: ToolAnnotations;
+        readonly annotations: ToolAnnotations | null;
     }
+
+    /**
+     * @deprecated Use `Tool` instead.
+     */
+    // TODO: Remove once Chrome 160 reaches the stable channel.
+    type RegisteredTool = Tool;
 
     /**
      * Initialization options for a `ToolActivatedEvent`.
@@ -261,14 +276,14 @@ namespace WebMCP {
          * Returns a list of registered tools exposed to this document.
          * @param options Filtering options.
          */
-        getTools(options?: ModelContextGetToolOptions): Promise<RegisteredTool[]>;
+        getTools(options?: ModelContextGetToolOptions): Promise<Tool[]>;
         /**
          * Executes a tool on the document it was registered on.
-         * @param tool The tool to execute.
+         * @param tool The tool to execute, as returned by `getTools()`.
          * @param inputObject The input parameters for the tool.
          * @param options Execution options.
          */
-        executeTool(tool: RegisteredTool, inputObject?: object, options?: ModelContextExecuteToolOptions): Promise<string>;
+        executeTool(tool: Tool, inputObject?: object, options?: ModelContextExecuteToolOptions): Promise<string>;
         /**
          * Event handler for the toolchange event.
          */
