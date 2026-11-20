@@ -189,7 +189,7 @@ test('supports tool annotations', () => {
         debugging?: boolean;
     }>();
     expectTypeOf<WebMCP.ModelContextTool['annotations']>().toEqualTypeOf<WebMCP.ToolAnnotations | undefined>();
-    expectTypeOf<WebMCP.RegisteredTool['annotations']>().toEqualTypeOf<WebMCP.ToolAnnotations | undefined>();
+    expectTypeOf<WebMCP.Tool['annotations']>().toEqualTypeOf<WebMCP.ToolAnnotations | null>();
 });
 
 test('infers execute output from an output schema', () => {
@@ -236,7 +236,7 @@ test('infers execute output from an output schema', () => {
     });
 
     expectTypeOf<WebMCP.ModelContextTool['outputSchema']>().toEqualTypeOf<object | undefined>();
-    expectTypeOf<WebMCP.RegisteredTool['outputSchema']>().toEqualTypeOf<object | undefined>();
+    expectTypeOf<WebMCP.Tool['outputSchema']>().toEqualTypeOf<object | null>();
 });
 
 test('rejects an invalid output schema or a return value that disagrees with it', () => {
@@ -277,23 +277,46 @@ test('rejects an invalid output schema or a return value that disagrees with it'
     });
 });
 
-declare const registeredTool: WebMCP.RegisteredTool;
+declare const tool: WebMCP.Tool;
+
+test('exposes discovered tools as read-only Tool objects', async () => {
+    if (document.modelContext) {
+        const tools = await document.modelContext.getTools();
+        expectTypeOf(tools).toEqualTypeOf<WebMCP.Tool[]>();
+    }
+
+    expectTypeOf(tool.name).toEqualTypeOf<string>();
+    expectTypeOf(tool.title).toEqualTypeOf<string>();
+    expectTypeOf(tool.description).toEqualTypeOf<string>();
+    expectTypeOf(tool.inputSchema).toEqualTypeOf<object | null>();
+    expectTypeOf(tool.outputSchema).toEqualTypeOf<object | null>();
+    expectTypeOf(tool.source).toEqualTypeOf<WindowProxy | null>();
+    expectTypeOf(tool.origin).toEqualTypeOf<string>();
+    expectTypeOf(tool.annotations).toEqualTypeOf<WebMCP.ToolAnnotations | null>();
+
+    // @ts-expect-error Tool attributes are read-only.
+    tool.name = 'renamed';
+    // Kept for compatibility with Chrome versions before 160.
+    expectTypeOf(tool.window).toEqualTypeOf<Window | undefined>();
+
+    expectTypeOf<WebMCP.RegisteredTool>().toEqualTypeOf<WebMCP.Tool>();
+});
 
 test('supports executeTool', async () => {
     const controller = new AbortController();
 
     if (document.modelContext) {
-        const result = await document.modelContext.executeTool(registeredTool);
+        const result = await document.modelContext.executeTool(tool);
         expectTypeOf(result).toEqualTypeOf<string>();
 
-        await document.modelContext.executeTool(registeredTool, { query: 'test' });
-        await document.modelContext.executeTool(registeredTool, [1, 2, 3]);
-        await document.modelContext.executeTool(registeredTool, {}, { signal: controller.signal });
+        await document.modelContext.executeTool(tool, { query: 'test' });
+        await document.modelContext.executeTool(tool, [1, 2, 3]);
+        await document.modelContext.executeTool(tool, {}, { signal: controller.signal });
 
         // @ts-expect-error inputObject must be an object.
-        await document.modelContext.executeTool(registeredTool, 'invalid');
+        await document.modelContext.executeTool(tool, 'invalid');
         // @ts-expect-error inputObject must be an object.
-        await document.modelContext.executeTool(registeredTool, 123);
+        await document.modelContext.executeTool(tool, 123);
     }
 
     expectTypeOf<WebMCP.ModelContextExecuteToolOptions>().toEqualTypeOf<{
