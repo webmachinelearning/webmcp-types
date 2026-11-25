@@ -279,15 +279,13 @@ test('rejects an invalid output schema or a return value that disagrees with it'
 
 test('supports waitForToolsUntil', () => {
     if (document.modelContext) {
-        const toolsRegistered = (async () => {
-            await document.modelContext?.registerTool({
-                name: 'async-tool',
-                description: 'Registered asynchronously.',
-                execute: async () => 'ok',
-            });
-        })();
+        const toolRegistered = document.modelContext.registerTool({
+            name: 'async-tool',
+            description: 'Registered asynchronously.',
+            execute: async () => 'ok',
+        });
 
-        expectTypeOf(document.modelContext.waitForToolsUntil(toolsRegistered)).toEqualTypeOf<void>();
+        expectTypeOf(document.modelContext.waitForToolsUntil(toolRegistered)).toEqualTypeOf<void>();
         document.modelContext.waitForToolsUntil(Promise.resolve(42));
 
         // @ts-expect-error promise is required.
