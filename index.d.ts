@@ -273,6 +273,15 @@ namespace WebMCP {
          */
         registerTool<const TInputSchema extends object = object, const TOutputSchema extends object = object>(tool: ModelContextToolFromSchema<TInputSchema, TOutputSchema>, options?: ModelContextRegisterToolOptions): Promise<void>;
         /**
+         * Signals that the document is asynchronously registering or updating its tools, and that tool
+         * consumers should wait until `promise` settles (or a timeout elapses) before reading the document's tools.
+         * Multiple promises can be registered; the document's tools are considered ready once all registered promises have settled.
+         * @param promise A promise that settles once the document's tools are ready.
+         * @throws {DOMException} `InvalidStateError` if the document is not fully active.
+         * @throws {DOMException} `NotAllowedError` if the document is not allowed to use the "tools" feature.
+         */
+        waitForToolsUntil(promise: Promise<any>): void;
+        /**
          * Returns a list of registered tools exposed to this document.
          * @param options Filtering options.
          */
