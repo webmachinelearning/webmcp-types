@@ -277,6 +277,24 @@ test('rejects an invalid output schema or a return value that disagrees with it'
     });
 });
 
+test('supports waitForToolsUntil', () => {
+    if (document.modelContext) {
+        const toolRegistered = document.modelContext.registerTool({
+            name: 'async-tool',
+            description: 'Registered asynchronously.',
+            execute: async () => 'ok',
+        });
+
+        expectTypeOf(document.modelContext.waitForToolsUntil(toolRegistered)).toEqualTypeOf<void>();
+        document.modelContext.waitForToolsUntil(Promise.resolve(42));
+
+        // @ts-expect-error promise is required.
+        document.modelContext.waitForToolsUntil();
+        // @ts-expect-error promise must be a Promise.
+        document.modelContext.waitForToolsUntil('invalid');
+    }
+});
+
 declare const tool: WebMCP.Tool;
 
 test('exposes discovered tools as read-only Tool objects', async () => {
