@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/webmachinelearning/webmcp-types/compare/v0.2.0...v0.2.1) (2026-11-28)
+
+
+### Features
+
+* add ModelContext.waitForToolsUntil() ([7ab52b1](https://github.com/webmachinelearning/webmcp-types/commit/7ab52b11e52cc3ac196fe9d5b8f627687581721a))
+* add ModelContext.waitForToolsUntil() ([0419345](https://github.com/webmachinelearning/webmcp-types/commit/0419345753dae42ff833a52e85ce3e7fe0eb0e5e))
+
 ## [0.2.0](https://github.com/webmachinelearning/webmcp-types/compare/v0.1.11...v0.2.0) (2026-11-20)
 
 
